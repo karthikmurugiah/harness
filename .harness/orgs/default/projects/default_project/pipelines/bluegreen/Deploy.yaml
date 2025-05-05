@@ -1,0 +1,69 @@
+pipeline:
+  name: BlueGreen
+  identifier: Deploy
+  projectIdentifier: default_project
+  orgIdentifier: default
+  tags: {}
+  stages:
+    - stage:
+        name: Deploy-Stage
+        identifier: DeployStage
+        description: ""
+        type: Deployment
+        spec:
+          deploymentType: Kubernetes
+          service:
+            serviceRef: harnessdemoservice
+          environment:
+            environmentRef: LocalEnvDockerDesktop
+            deployToAll: false
+            infrastructureDefinitions:
+              - identifier: LocalInfra
+          execution:
+            steps:
+              - step:
+                  type: K8sBlueGreenDeploy
+                  name: K8sBlueGreenDeploy_1
+                  identifier: K8sBlueGreenDeploy_1
+                  spec:
+                    skipDryRun: false
+                    pruningEnabled: false
+                    skipUnchangedManifest: false
+                    trafficRouting:
+                      spec:
+                        routes:
+                          - route:
+                              type: http
+                              name: route1
+                              destinations:
+                                - destination:
+                                    host: stable
+                                - destination:
+                                    host: stage
+                        name: <+service.name>-virtual-service
+                        delegateService: true
+                      provider: istio
+                  timeout: 10m
+            rollbackSteps:
+              - step:
+                  name: Rollback Rollout Deployment
+                  identifier: rollbackRolloutDeployment
+                  type: K8sRollingRollback
+                  timeout: 10m
+                  spec:
+                    pruningEnabled: false
+        tags: {}
+        failureStrategies:
+          - onFailure:
+              errors:
+                - AllErrors
+              action:
+                type: StageRollback
+        delegateSelectors:
+          - helm-delegate
+  variables:
+    - name: artifactVersion
+      type: String
+      description: ""
+      required: false
+      value: latest
