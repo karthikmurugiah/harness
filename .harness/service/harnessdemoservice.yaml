@@ -1,0 +1,26 @@
+service:
+  name: harnessdemoservice
+  identifier: harnessdemoservice
+  orgIdentifier: default
+  projectIdentifier: default_project
+  serviceDefinition:
+    spec:
+      manifests:
+        - manifest:
+            identifier: harnessdemoservice
+            type: K8sManifest
+            spec:
+              store:
+                type: Github
+                spec:
+                  connectorRef: KarthikPersonalGithubConnector
+                  gitFetchType: Branch
+                  paths:
+                    - .harness/manifests
+                  repoName: harnessdemoservice
+                  branch: main
+              valuesPaths:
+                - .harness/values/values.yaml
+              skipResourceVersioning: false
+              enableDeclarativeRollback: false
+    type: Kubernetes
