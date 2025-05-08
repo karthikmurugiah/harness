@@ -67,3 +67,8 @@ pipeline:
       description: ""
       required: false
       value: latest
+    - name: deployTimestamp
+      type: String
+      description: To force deployment everytime
+      required: false
+      value: <+input>
